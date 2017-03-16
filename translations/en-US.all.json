@@ -1,0 +1,50 @@
+[
+  {
+    "id": "json_invalid",
+    "translation": "The JSON file is invalid."
+  },
+  {
+    "id": "number_of_pages_under_1",
+    "translation": "The number of pages cannot be lower than 1."
+  },
+  {
+    "id": "number_of_pages_upper_5000",
+    "translation": "The number of pages cannot be greater than 5000."
+  },
+  {
+    "id": "book_created",
+    "translation": "The book was created."
+  },
+  {
+    "id": "book_doesnt_exists",
+    "translation": "The book doesn't exists."
+  },
+  {
+    "id": "title_empty",
+    "translation": "The title cannot be empty."
+  },
+  {
+    "id": "title_upper_256",
+    "translation": "The title cannot be greater than 256 characters."
+  },
+  {
+    "id": "unable_create_book",
+    "translation": "Unable to create book."
+  },
+  {
+    "id": "unable_retrieves_books",
+    "translation": "Unable to retrieves books."
+  },
+  {
+    "id": "uuid_invalid",
+    "translation": "The UUID is not valid."
+  },
+  {
+    "id": "no_books_available",
+    "translation": "No books available."
+  },
+  {
+    "id": "internal_error",
+    "translation": "Internal server error."
+  }
+]

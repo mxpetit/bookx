@@ -3,11 +3,14 @@ package datastore
 import (
 	"github.com/franela/goblin"
 	"github.com/gocql/gocql"
-	"github.com/mxpetit/bookx/model"
 	"testing"
 )
 
 func TestBook(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipped")
+	}
+
 	g := goblin.Goblin(t)
 	session, err := openTest()
 
@@ -22,60 +25,52 @@ func TestBook(t *testing.T) {
 			session.Query("TRUNCATE book").Exec()
 		})
 
-		g.It("shoud get a list", func() {
-			_, err1 := store.CreateBook("Foo", 250)
-			_, err2 := store.CreateBook("Bar", 250)
-			results, err3 := store.GetAllBooks(gocql.UUID{}, 2)
+		g.Describe("GetAllBooks", func() {
+			g.It("should get a list of size 2", func() {
+				_, err1 := store.CreateBook("Foo", 250)
+				_, err2 := store.CreateBook("Bar", 250)
+				results, err3 := store.GetAllBooks("", "10")
 
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsTrue()
-			g.Assert(results.Length == 2)
+				g.Assert(err1 == nil).IsTrue()
+				g.Assert(err2 == nil).IsTrue()
+				g.Assert(err3 == nil).IsTrue()
+				g.Assert(len(results) == 2)
 
-			book1 := results.Results[0].(model.Book)
-			book2 := results.Results[1].(model.Book)
+				for i := 0; i < len(results); i++ {
+					g.Assert(results[i].Id != gocql.UUID{}).IsTrue()
+					g.Assert(results[i].NumberOfPages != 0).IsTrue()
+					g.Assert(results[i].Title != "").IsTrue()
+				}
+			})
 
-			g.Assert(book1.Title != "").IsTrue()
-			g.Assert(book1.NumberOfPages != 0).IsTrue()
-			g.Assert(book2.Title != "").IsTrue()
-			g.Assert(book2.NumberOfPages != 0).IsTrue()
+			g.It("should return an error (no_books_available)", func() {
+				results, err := store.GetAllBooks("", "10")
+
+				g.Assert(err == ErrNoBooksAvailable).IsTrue()
+				g.Assert(len(results) == 0)
+			})
 		})
 
-		g.It("should get one element from the list", func() {
-			_, err1 := store.CreateBook("Foo", 250)
-			_, err2 := store.CreateBook("Bar", 250)
-			_, err3 := store.CreateBook("Baz", 250)
-			_, err4 := store.CreateBook("Xyzzy", 250)
-			results, err5 := store.GetAllBooks(gocql.UUID{}, 1)
+		g.Describe("GetBook", func() {
+			g.It("should get one book", func() {
+				id, err1 := store.CreateBook("Foo", 250)
+				parsedId, err2 := gocql.ParseUUID(id)
+				book, err3 := store.GetBook(id)
 
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsTrue()
-			g.Assert(err4 == nil).IsTrue()
-			g.Assert(err5 == nil).IsTrue()
-			g.Assert(results.Length == 1).IsTrue()
+				g.Assert(err1 == nil).IsTrue()
+				g.Assert(err2 == nil).IsTrue()
+				g.Assert(err3 == nil).IsTrue()
+				g.Assert(book.Title == "Foo").IsTrue()
+				g.Assert(book.NumberOfPages == 250).IsTrue()
+				g.Assert(book.Id == parsedId).IsTrue()
+			})
 
-			book := results.Results[0].(model.Book)
+			g.It("should return an error (ErrBookDoesNotExists)", func() {
+				// Inexistant UUID, refer to https://tools.ietf.org/html/rfc4122#page-4
+				_, err2 := store.GetBook("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
 
-			g.Assert(book.NumberOfPages != 0).IsTrue()
-			g.Assert(book.Title != "").IsTrue()
-		})
-
-		g.It("shouldn't get a list because end is lower than 1", func() {
-			results, err := store.GetAllBooks(gocql.UUID{}, 0)
-
-			g.Assert(err != nil).IsTrue()
-			g.Assert(results.Length == 0).IsTrue()
-		})
-
-		g.It("should get by ID", func() {
-			id, err1 := store.CreateBook("Foo", 250)
-			books, err2 := store.GetBook(id)
-
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(books.Title == "Foo").IsTrue()
-			g.Assert(books.NumberOfPages == 250).IsTrue()
+				g.Assert(err2 == ErrBookDoesNotExists).IsTrue()
+			})
 		})
 	})
 }

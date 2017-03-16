@@ -13,8 +13,7 @@ type datastore struct {
 	*gocql.Session
 }
 
-// New create a connection to the database from environnement variable and
-// returns a Store.
+// New returns a Store given environnement variable.
 func New() store.Store {
 	session, err := open(os.Getenv("BOOKX_IP"), os.Getenv("BOOKX_KEYSPACE"))
 
@@ -25,13 +24,12 @@ func New() store.Store {
 	return From(session)
 }
 
-// From returns a Store based on the session provided.
+// From returns a Store given a session.
 func From(session *gocql.Session) store.Store {
 	return &datastore{session}
 }
 
-// open opens a new database connection with the specified parameters and
-// returns a session.
+// open returns a session given IP and keyspace.
 func open(ip, keyspace string) (*gocql.Session, error) {
 	if keyspace == "" || ip == "" {
 		return nil,

@@ -1,10 +1,10 @@
 package datastore
 
 import (
-	"errors"
 	"github.com/gocql/gocql"
 	"github.com/mxpetit/bookx/model"
-	"github.com/mxpetit/bookx/model/response"
+	"net/http"
+	"strconv"
 )
 
 const (
@@ -14,62 +14,76 @@ const (
 	insertBook       = "INSERT INTO book (id, number_of_pages, title) VALUES (?, ?, ?)"
 )
 
-// GetAllBooks retuns the number of books from the UUID to count. If the UUID
-// is empty, it'll get the first books as specified by count parameter.
-func (db *datastore) GetAllBooks(oldId gocql.UUID, count int) (response.Multiple, error) {
-	if count < 1 {
-		return response.Multiple{}, errors.New("Cannot get less than 1 item.")
-	}
+var (
+	ErrNoBooksAvailable       = model.NewDatastoreError(http.StatusNotFound, "no_books_available")
+	ErrUnableToRetrievesBooks = model.NewDatastoreError(http.StatusInternalServerError, "unable_retrieves_books")
+	ErrBookDoesNotExists      = model.NewDatastoreError(http.StatusNotFound, "book_doesnt_exists")
+	ErrUnableToGenerateUUID   = model.NewDatastoreError(http.StatusInternalServerError, "unable_generate_uuid")
+	ErrUnableToCreateBook     = model.NewDatastoreError(http.StatusInternalServerError, "unable_create_book")
+	ErrUUIDInvalid            = model.NewDatastoreError(http.StatusBadRequest, "uuid_invalid")
+)
 
+// GetAllBooks retuns the number of books between lastToken and offset. If lastToken isn't valid,
+// it'll get the first books as specified by offset parameter.
+func (db *datastore) GetAllBooks(lastToken, offset string) ([]*model.Book, error) {
 	var title string
 	var numberOfPages int
-	var bookId, newId gocql.UUID
-	var queryResults []interface{}
+	var id gocql.UUID
+	var results []*model.Book
 	var query *gocql.Query
 
-	// If no id provided, we get the first elements
-	if oldId == (gocql.UUID{}) {
-		query = db.Query(getAllBooks, count)
+	parsedOffset, err := strconv.Atoi(offset)
+
+	if err != nil {
+		parsedOffset = 10
+	}
+
+	if parsedId, err := gocql.ParseUUID(lastToken); err != nil {
+		query = db.Query(getAllBooks, parsedOffset)
 	} else {
-		query = db.Query(getAllPagedBooks, oldId, count)
+		query = db.Query(getAllPagedBooks, parsedId, parsedOffset)
 	}
 
 	iter := query.Iter()
 
-	for iter.Scan(&bookId, &numberOfPages, &title) {
-		queryResults = append(queryResults, model.Book{
-			Id:            bookId,
+	for iter.Scan(&id, &numberOfPages, &title) {
+		results = append(results, &model.Book{
+			Id:            id,
 			Title:         title,
 			NumberOfPages: numberOfPages,
 		})
-
-		newId = bookId
 	}
 
-	if err := iter.Close(); err != nil {
-		return response.Multiple{}, err
+	if err = iter.Close(); err != nil {
+		return []*model.Book{}, ErrUnableToRetrievesBooks
 	}
 
-	multiple := response.Multiple{
-		Links:   newId.String(),
-		Results: queryResults,
-		Length:  len(queryResults),
+	if len(results) == 0 {
+		return []*model.Book{}, ErrNoBooksAvailable
 	}
 
-	return multiple, nil
+	return results, nil
 }
 
-// GetBook returns the details of a book given its id.
-func (db *datastore) GetBook(id gocql.UUID) (model.Book, error) {
+// GetBook returns book's details given its id.
+func (db *datastore) GetBook(id string) (*model.Book, error) {
 	var title string
 	var numberOfPages int
 
-	if err := db.Query(getBook, id).Scan(&id, &numberOfPages, &title); err != nil {
-		return model.Book{}, err
+	parsedId, err := gocql.ParseUUID(id)
+
+	if err != nil {
+		return &model.Book{}, ErrUUIDInvalid
 	}
 
-	queryResult := model.Book{
-		Id:            id,
+	err = db.Query(getBook, parsedId).Scan(&parsedId, &numberOfPages, &title)
+
+	if err == gocql.ErrNotFound {
+		return &model.Book{}, ErrBookDoesNotExists
+	}
+
+	queryResult := &model.Book{
+		Id:            parsedId,
 		Title:         title,
 		NumberOfPages: numberOfPages,
 	}
@@ -77,17 +91,17 @@ func (db *datastore) GetBook(id gocql.UUID) (model.Book, error) {
 	return queryResult, nil
 }
 
-// CreateBook returns the id of the book that was created.
-func (db *datastore) CreateBook(title string, numberOfPages int) (gocql.UUID, error) {
+// CreateBook returns the book's id that was created.
+func (db *datastore) CreateBook(title string, numberOfPages int) (string, error) {
 	id, err := gocql.RandomUUID()
 
 	if err != nil {
-		return gocql.UUID{}, err
+		return gocql.UUID{}.String(), ErrUnableToGenerateUUID
 	}
 
 	if err = db.Query(insertBook, id, numberOfPages, title).Exec(); err != nil {
-		return gocql.UUID{}, err
+		return gocql.UUID{}.String(), ErrUnableToCreateBook
 	}
 
-	return id, nil
+	return id.String(), nil
 }

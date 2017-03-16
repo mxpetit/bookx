@@ -6,8 +6,8 @@ import (
 	"github.com/mxpetit/bookx/store/datastore"
 )
 
-// Store is a middleware that initializes the Datastore and attaches to
-// the context of every http.Request.
+// Store initializes the Datastore and attaches it to the context of every
+// http.Request.
 func Store() gin.HandlerFunc {
 	v := datastore.New()
 
