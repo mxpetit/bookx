@@ -16,7 +16,7 @@ func (u UUID) validate(parameters *Parameters) error {
 	lastToken, ok := (*parameters)["lastToken"]
 
 	// No token provided
-	if lastToken == "" {
+	if lastToken == nil {
 		return nil
 	}
 

@@ -8,7 +8,7 @@ import (
 
 func TestBook(t *testing.T) {
 	if testing.Short() {
-		t.Skip("Skipped")
+		t.Skip("Skipping book datastore...")
 	}
 
 	g := goblin.Goblin(t)

@@ -46,5 +46,9 @@
   {
     "id": "internal_error",
     "translation": "Erreur interne du serveur."
+  },
+  {
+    "id": "offset_invalid",
+    "translation": "Le paramètre offset n'est pas valide."
   }
 ]

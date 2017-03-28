@@ -21,7 +21,7 @@ func (p Pagination) validate(parameters *Parameters) error {
 	offset, ok := (*parameters)["offset"]
 
 	// No offset provided
-	if offset == "" {
+	if offset == nil {
 		return nil
 	}
 

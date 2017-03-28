@@ -12,9 +12,9 @@ const (
 // it'll use the default language as specified by the const DEFAULT_LANGUAGE.
 func Localisation() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		acceptedLanguage := c.Request.Header.Get("Accept-Language")
+		language := c.Request.Header.Get("Accept-Language")
 
-		if !isLanguageValid(acceptedLanguage) {
+		if !isLanguageAccepted(language) {
 			c.Request.Header.Set("Accept-Language", DEFAULT_LANGUAGE)
 		}
 
@@ -23,7 +23,7 @@ func Localisation() gin.HandlerFunc {
 }
 
 // isLanguageValid checks if the given language is valid and available.
-func isLanguageValid(language string) bool {
+func isLanguageAccepted(language string) bool {
 	switch language {
 	case DEFAULT_LANGUAGE, "en-US":
 		return true

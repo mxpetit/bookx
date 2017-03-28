@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// ValidatorRule represents a rule that will semanticallychecks
+// ValidatorRule represents a rule that will semantically checks
 // the correctness of a portion of parameters.
 type ValidatorRule interface {
 	validate(parameters *Parameters) error
@@ -62,7 +62,25 @@ func appendError(errs []string, err error) []string {
 	return errs
 }
 
-// AddRules adds one or more ValidatorRule to a Validator.
+// AddRules adds one or more ValidatorRule to a Validator without duplicates.
 func (s *Validator) AddRules(rules ...ValidatorRule) {
-	s.rules = append(s.rules, rules...)
+	for _, value := range rules {
+		if !s.containsRule(value) {
+			s.rules = append(s.rules, value)
+		}
+	}
+}
+
+// containsRule checks wether the rule that will be added is
+// already registered.
+func (s *Validator) containsRule(ruleToAdd ValidatorRule) bool {
+	contains := false
+
+	for i := 0; i < len(s.rules) && !contains; i++ {
+		if s.rules[i] == ruleToAdd {
+			contains = true
+		}
+	}
+
+	return contains
 }
