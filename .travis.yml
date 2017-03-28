@@ -1,0 +1,10 @@
+language: go
+
+go:
+  - 1.7.3
+install:
+  - go get -u github.com/kardianos/govendor
+before_install:
+  - govendor sync
+script:
+  - govendor test -short -race -bench=. +local
