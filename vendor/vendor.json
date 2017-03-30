@@ -87,6 +87,12 @@
 			"revisionTime": "2017-02-10T00:59:48Z"
 		},
 		{
+			"checksumSHA1": "uEc9/1HbYGeK7wPStF6FmUlfzGE=",
+			"path": "github.com/nicksnyder/go-i18n/i18n",
+			"revision": "be79775dc0d732144a0948d056c678bc653293bb",
+			"revisionTime": "2017-03-19T19:51:18Z"
+		},
+		{
 			"checksumSHA1": "UW57eu+Se/KHPD+SoNJLIERYHZQ=",
 			"path": "github.com/nicksnyder/go-i18n/i18n/bundle",
 			"revision": "2c24b78755bd85f2b97c45f6f1bf906660b59d56",

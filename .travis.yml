@@ -5,6 +5,6 @@ go:
 before_install:
   - go get -u github.com/kardianos/govendor
 install:
-  - govendor fetch
+  - govendor sync
 script:
   - govendor test -short -race -bench=. +local
