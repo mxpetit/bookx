@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mxpetit/bookx.svg?branch=master)](https://travis-ci.org/mxpetit/bookx)
+
 ## Installation
 
 Simply clone this project :
