@@ -9,20 +9,13 @@ import (
 )
 
 func GetAllBooks(c *gin.Context) {
-	lastToken := c.Query("last_token")
-	offset := c.Query("offset")
-
-	parameters := validators.Parameters{
-		"lastToken": lastToken,
-		"offset":    offset,
-	}
-
-	validator := validators.New(&parameters)
+	parameters := GetParameters(c, "last_token", "offset")
+	validator := validators.New(parameters)
 	validator.AddRules(validators.Pagination{}, validators.UUID{})
 	result := validator.Validate()
 
 	if result.Code == http.StatusOK {
-		result = store.GetAllBooks(c, lastToken, offset)
+		result = store.GetAllBooks(c, parameters)
 	}
 
 	translateAndWriteResponse(c, &result)

@@ -12,8 +12,8 @@ type Store interface {
 	CreateBook(string, int) (string, error)
 }
 
-func GetAllBooks(c context.Context, lastToken, offset string) renderer.Response {
-	result, err := FromContext(c).GetAllBooks(lastToken, offset)
+func GetAllBooks(c context.Context, parameters map[string]string) renderer.Response {
+	result, err := FromContext(c).GetAllBooks(parameters["last_token"], parameters["offset"])
 
 	return renderer.RenderGetAllBooks(result, err)
 }

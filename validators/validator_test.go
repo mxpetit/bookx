@@ -38,17 +38,18 @@ func TestValidator(t *testing.T) {
 
 		g.Describe("AddRules", func() {
 			g.It("should add one rule", func() {
-				parameters := Parameters{}
-				validator := New(&parameters)
+				parameters := map[string]string{}
+				validator := New(parameters)
 
 				validator.AddRules(Pagination{})
 
 				g.Assert(len(validator.rules) == 1).IsTrue()
+				g.Assert(validator.rules[0] == Pagination{}).IsTrue()
 			})
 
 			g.It("should add two rules", func() {
-				parameters := Parameters{}
-				validator := New(&parameters)
+				parameters := map[string]string{}
+				validator := New(parameters)
 
 				validator.AddRules(Pagination{}, UUID{})
 
@@ -58,8 +59,8 @@ func TestValidator(t *testing.T) {
 			})
 
 			g.It("should add rules without duplicates", func() {
-				parameters := Parameters{}
-				validator := New(&parameters)
+				parameters := map[string]string{}
+				validator := New(parameters)
 
 				validator.AddRules(Pagination{}, UUID{}, Pagination{}, UUID{})
 
@@ -71,8 +72,8 @@ func TestValidator(t *testing.T) {
 
 		g.Describe("containsRule", func() {
 			g.It("should check if the given rules is registered", func() {
-				parameters := Parameters{}
-				validator := New(&parameters)
+				parameters := map[string]string{}
+				validator := New(parameters)
 				validator.AddRules(Pagination{})
 
 				contains1 := validator.containsRule(Pagination{})
@@ -84,10 +85,22 @@ func TestValidator(t *testing.T) {
 		})
 
 		g.Describe("Validate", func() {
-			g.It("should check that all parameters are valid, and return any errors that happened", func() {
-				parameters := Parameters{}
-				validator := New(&parameters)
-				validator.AddRules(TotoValidator{}, TataValidator{})
+			g.It("should validate all parameters", func() {
+				parameters := map[string]string{
+					"foo": "bar",
+				}
+				validator := New(parameters)
+				validator.AddRules(FooValidator{})
+				response := validator.Validate()
+
+				g.Assert(response.Code == http.StatusOK).IsTrue()
+				g.Assert(len(response.Data) == 0).IsTrue()
+			})
+
+			g.It("should return \"foo_validator_error\"", func() {
+				parameters := map[string]string{}
+				validator := New(parameters)
+				validator.AddRules(BarValidator{})
 				response := validator.Validate()
 
 				messsages, ok := response.Data["messages"].([]string)
@@ -100,20 +113,20 @@ func TestValidator(t *testing.T) {
 				g.Assert(response.Code == http.StatusBadRequest).IsTrue()
 				g.Assert(response.Data["length"] == 1).IsTrue()
 				g.Assert(len(messsages) == 1).IsTrue()
-				g.Assert(messsages[0] == "tatavalidator_error").IsTrue()
+				g.Assert(messsages[0] == "foo_validator_error").IsTrue()
 			})
 		})
 	})
 }
 
 // Mocked validators for testing purpose
-type TotoValidator struct{}
-type TataValidator struct{}
+type FooValidator struct{}
+type BarValidator struct{}
 
-func (t TotoValidator) validate(parameters *Parameters) error {
+func (t FooValidator) validate(parameters map[string]string) error {
 	return nil
 }
 
-func (t TataValidator) validate(parameters *Parameters) error {
-	return errors.New("tatavalidator_error")
+func (t BarValidator) validate(parameters map[string]string) error {
+	return errors.New("foo_validator_error")
 }

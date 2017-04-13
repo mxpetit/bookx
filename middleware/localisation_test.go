@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestBook(t *testing.T) {
+func TestLocalisation(t *testing.T) {
 	g := goblin.Goblin(t)
 
 	g.Describe("isLanguageAccepted", func() {

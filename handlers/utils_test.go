@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestBook(t *testing.T) {
+func TestUtils(t *testing.T) {
 	g := goblin.Goblin(t)
 
 	g.Describe("Book handler", func() {

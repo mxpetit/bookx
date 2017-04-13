@@ -8,25 +8,18 @@ import (
 type UUID struct{}
 
 var (
-	ErrUnableParseUUID = errors.New("unable_parse_uuid")
-	ErrInvalidUUID     = errors.New("uuid_invalid")
+	ErrInvalidUUID = errors.New("uuid_invalid")
 )
 
-func (u UUID) validate(parameters *Parameters) error {
-	lastToken, ok := (*parameters)["lastToken"]
+func (u UUID) validate(parameters map[string]string) error {
+	lastToken, _ := parameters["lastToken"]
 
 	// No token provided
-	if lastToken == nil {
+	if lastToken == "" {
 		return nil
 	}
 
-	parsedLastToken, ok := lastToken.(string)
-
-	if !ok {
-		return ErrUnableParseUUID
-	}
-
-	_, err := gocql.ParseUUID(parsedLastToken)
+	_, err := gocql.ParseUUID(lastToken)
 
 	if err != nil {
 		return ErrInvalidUUID

@@ -9,7 +9,6 @@ type Pagination struct{}
 
 var (
 	ErrOffsetInvalid      = errors.New("offset_invalid")
-	ErrUnableParseOffset  = errors.New("unable_parse_offset")
 	ErrOffsetIsNotANumber = errors.New("offset_not_number")
 )
 
@@ -17,21 +16,15 @@ var (
 	acceptedOffsets = []int{10, 25, 50, 100}
 )
 
-func (p Pagination) validate(parameters *Parameters) error {
-	offset, ok := (*parameters)["offset"]
+func (p Pagination) validate(parameters map[string]string) error {
+	offset, _ := parameters["offset"]
 
 	// No offset provided
-	if offset == nil {
+	if offset == "" {
 		return nil
 	}
 
-	offsetString, ok := offset.(string)
-
-	if !ok {
-		return ErrUnableParseOffset
-	}
-
-	count, err := strconv.Atoi(offsetString)
+	count, err := strconv.Atoi(offset)
 
 	if err != nil {
 		return ErrOffsetIsNotANumber

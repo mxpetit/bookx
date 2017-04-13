@@ -8,21 +8,18 @@ import (
 // ValidatorRule represents a rule that will semantically checks
 // the correctness of a portion of parameters.
 type ValidatorRule interface {
-	validate(parameters *Parameters) error
+	validate(parameters map[string]string) error
 }
-
-// Parameters wraps a map of string / interface.
-type Parameters map[string]interface{}
 
 // Validator represents a set of ValidatorRule and it's associated
 // parameters.
 type Validator struct {
 	rules      []ValidatorRule
-	parameters *Parameters
+	parameters map[string]string
 }
 
 // New instantiates a new Validator.
-func New(parameters *Parameters) *Validator {
+func New(parameters map[string]string) *Validator {
 	return &Validator{
 		rules:      []ValidatorRule{},
 		parameters: parameters,
