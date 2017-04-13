@@ -5,6 +5,7 @@ import (
 	"github.com/mxpetit/bookx/handlers"
 	"github.com/mxpetit/bookx/middleware"
 	"github.com/nicksnyder/go-i18n/i18n"
+	"os"
 )
 
 func main() {
@@ -15,6 +16,7 @@ func main() {
 
 	app.Use(middleware.Store())
 	app.Use(middleware.Localisation())
+	app.Use(middleware.Cors())
 	app.Use(gin.Logger())
 	app.Use(gin.Recovery())
 
@@ -25,5 +27,17 @@ func main() {
 		bookGroup.POST("", handlers.CreateBook)
 	}
 
-	app.Run(":8080")
+	app.Run(":" + getPort())
+}
+
+// getPort returns the value port contained in BOOKX_PORT or the default
+// if any.
+func getPort() string {
+	port := os.Getenv("BOOKX_PORT")
+
+	if port == "" {
+		return "8080"
+	}
+
+	return port
 }
