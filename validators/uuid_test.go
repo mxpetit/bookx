@@ -24,7 +24,7 @@ func TestUUIDValidator(t *testing.T) {
 
 			g.It("should return an error since the token is not valid", func() {
 				parameters := map[string]string{
-					"lastToken": "bad_token",
+					"uuid": "bad_token",
 				}
 
 				validator := New(parameters)
@@ -46,7 +46,7 @@ func TestUUIDValidator(t *testing.T) {
 			g.It("shouldn't return an error since the token is valid", func() {
 				parameters := map[string]string{
 					// refering to https://tools.ietf.org/html/rfc4122#page-4
-					"lastToken": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+					"uuid": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
 				}
 
 				validator := New(parameters)

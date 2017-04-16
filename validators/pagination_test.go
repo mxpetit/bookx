@@ -13,7 +13,7 @@ func TestPaginationValidator(t *testing.T) {
 
 	g.Describe("Validators > pagination", func() {
 		g.Describe("validate", func() {
-			g.It("shouldn't return an error since the offset is optionnal", func() {
+			g.It("shouldn't return an error since the limit is optionnal", func() {
 				parameters := map[string]string{}
 				validator := New(parameters)
 				validator.AddRules(Pagination{})
@@ -23,9 +23,9 @@ func TestPaginationValidator(t *testing.T) {
 				g.Assert(response.Data == nil).IsTrue()
 			})
 
-			g.It("should return an error since the offset is not parsable to an int", func() {
+			g.It("should return an error since the limit is not parsable to an int", func() {
 				parameters := map[string]string{
-					"offset": "bad_parameter",
+					"limit": "bad_parameter",
 				}
 				validator := New(parameters)
 				validator.AddRules(Pagination{})
@@ -40,12 +40,12 @@ func TestPaginationValidator(t *testing.T) {
 				g.Assert(response.Code == http.StatusBadRequest).IsTrue()
 				g.Assert(response.Data["length"] == 1).IsTrue()
 				g.Assert(len(messsages) == 1).IsTrue()
-				g.Assert(messsages[0] == "offset_not_number").IsTrue()
+				g.Assert(messsages[0] == "limit_not_number").IsTrue()
 			})
 
-			g.It("should return an error since the offset is not accepted", func() {
+			g.It("should return an error since the limit is not accepted", func() {
 				parameters := map[string]string{
-					"offset": "0",
+					"limit": "0",
 				}
 				validator := New(parameters)
 				validator.AddRules(Pagination{})
@@ -60,12 +60,12 @@ func TestPaginationValidator(t *testing.T) {
 				g.Assert(response.Code == http.StatusBadRequest).IsTrue()
 				g.Assert(response.Data["length"] == 1).IsTrue()
 				g.Assert(len(messsages) == 1).IsTrue()
-				g.Assert(messsages[0] == "offset_invalid").IsTrue()
+				g.Assert(messsages[0] == "limit_invalid").IsTrue()
 			})
 
-			g.It("shouldn't return an error since the offset is valid", func() {
+			g.It("shouldn't return an error since the limit is valid", func() {
 				parameters := map[string]string{
-					"offset": "10",
+					"limit": "10",
 				}
 				validator := New(parameters)
 				validator.AddRules(Pagination{})
@@ -76,20 +76,20 @@ func TestPaginationValidator(t *testing.T) {
 			})
 		})
 
-		g.Describe("isOffsetAccepted", func() {
-			g.It("should return true since the offsets are accepted", func() {
+		g.Describe("isLimitAccepted", func() {
+			g.It("should return true since the limits are accepted", func() {
 				var results []bool
 				wanted := []bool{true, true, true, true}
 
-				for i := 0; i < len(acceptedOffsets); i++ {
-					results = append(results, isOffsetAccepted(acceptedOffsets[i]))
+				for i := 0; i < len(acceptedLimits); i++ {
+					results = append(results, isLimitAccepted(acceptedLimits[i]))
 				}
 
 				g.Assert(reflect.DeepEqual(results, wanted)).IsTrue()
 			})
 
-			g.It("should return false since the offset is not accepted", func() {
-				result := isOffsetAccepted(0)
+			g.It("should return false since the limit is not accepted", func() {
+				result := isLimitAccepted(0)
 
 				g.Assert(result).IsFalse()
 			})

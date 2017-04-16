@@ -13,13 +13,13 @@ type Store interface {
 }
 
 func GetAllBooks(c context.Context, parameters map[string]string) renderer.Response {
-	result, err := FromContext(c).GetAllBooks(parameters["last_token"], parameters["offset"])
+	result, err := FromContext(c).GetAllBooks(parameters["uuid"], parameters["limit"])
 
 	return renderer.RenderGetAllBooks(result, err)
 }
 
-func GetBook(c context.Context, id string) renderer.Response {
-	result, err := FromContext(c).GetBook(id)
+func GetBook(c context.Context, parameters map[string]string) renderer.Response {
+	result, err := FromContext(c).GetBook(parameters["uuid"])
 
 	return renderer.RenderGetBook(result, err)
 }

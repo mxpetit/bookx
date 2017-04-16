@@ -23,25 +23,25 @@ var (
 	ErrUUIDInvalid            = model.NewDatastoreError(http.StatusBadRequest, "uuid_invalid")
 )
 
-// GetAllBooks retuns the number of books between lastToken and offset. If lastToken isn't valid,
-// it'll get the first books as specified by offset parameter.
-func (db *datastore) GetAllBooks(lastToken, offset string) ([]*model.Book, error) {
+// GetAllBooks returns the number of books between uuid and limit. If uuid isn't valid,
+// it'll get the first books as specified by limit parameter.
+func (db *datastore) GetAllBooks(uuid, limit string) ([]*model.Book, error) {
 	var title string
 	var numberOfPages int
 	var id gocql.UUID
 	var results []*model.Book
 	var query *gocql.Query
 
-	parsedOffset, err := strconv.Atoi(offset)
+	parsedLimit, err := strconv.Atoi(limit)
 
 	if err != nil {
-		parsedOffset = 10
+		parsedLimit = 10
 	}
 
-	if parsedId, err := gocql.ParseUUID(lastToken); err != nil {
-		query = db.Query(getAllBooks, parsedOffset)
+	if parsedId, err := gocql.ParseUUID(uuid); err != nil {
+		query = db.Query(getAllBooks, parsedLimit)
 	} else {
-		query = db.Query(getAllPagedBooks, parsedId, parsedOffset)
+		query = db.Query(getAllPagedBooks, parsedId, parsedLimit)
 	}
 
 	iter := query.Iter()
@@ -65,12 +65,12 @@ func (db *datastore) GetAllBooks(lastToken, offset string) ([]*model.Book, error
 	return results, nil
 }
 
-// GetBook returns book's details given its id.
-func (db *datastore) GetBook(id string) (*model.Book, error) {
+// GetBook returns book's details given its uuid.
+func (db *datastore) GetBook(uuid string) (*model.Book, error) {
 	var title string
 	var numberOfPages int
 
-	parsedId, err := gocql.ParseUUID(id)
+	parsedId, err := gocql.ParseUUID(uuid)
 
 	if err != nil {
 		return &model.Book{}, ErrUUIDInvalid
@@ -91,17 +91,17 @@ func (db *datastore) GetBook(id string) (*model.Book, error) {
 	return queryResult, nil
 }
 
-// CreateBook returns the book's id that was created.
+// CreateBook returns the book's uuid that was created.
 func (db *datastore) CreateBook(title string, numberOfPages int) (string, error) {
-	id, err := gocql.RandomUUID()
+	uuid, err := gocql.RandomUUID()
 
 	if err != nil {
 		return gocql.UUID{}.String(), ErrUnableToGenerateUUID
 	}
 
-	if err = db.Query(insertBook, id, numberOfPages, title).Exec(); err != nil {
+	if err = db.Query(insertBook, uuid, numberOfPages, title).Exec(); err != nil {
 		return gocql.UUID{}.String(), ErrUnableToCreateBook
 	}
 
-	return id.String(), nil
+	return uuid.String(), nil
 }

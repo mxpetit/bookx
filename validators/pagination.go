@@ -8,40 +8,40 @@ import (
 type Pagination struct{}
 
 var (
-	ErrOffsetInvalid      = errors.New("offset_invalid")
-	ErrOffsetIsNotANumber = errors.New("offset_not_number")
+	ErrLimitInvalid      = errors.New("limit_invalid")
+	ErrLimitIsNotANumber = errors.New("limit_not_number")
 )
 
 var (
-	acceptedOffsets = []int{10, 25, 50, 100}
+	acceptedLimits = []int{10, 25, 50, 100}
 )
 
 func (p Pagination) validate(parameters map[string]string) error {
-	offset, _ := parameters["offset"]
+	limit, _ := parameters["limit"]
 
-	// No offset provided
-	if offset == "" {
+	// No limit provided
+	if limit == "" {
 		return nil
 	}
 
-	count, err := strconv.Atoi(offset)
+	count, err := strconv.Atoi(limit)
 
 	if err != nil {
-		return ErrOffsetIsNotANumber
+		return ErrLimitIsNotANumber
 	}
 
-	if !isOffsetAccepted(count) {
-		return ErrOffsetInvalid
+	if !isLimitAccepted(count) {
+		return ErrLimitInvalid
 	}
 
 	return nil
 }
 
-func isOffsetAccepted(offset int) bool {
+func isLimitAccepted(limit int) bool {
 	ok := false
 
-	for i := 0; i < len(acceptedOffsets) && !ok; i++ {
-		if acceptedOffsets[i] == offset {
+	for i := 0; i < len(acceptedLimits) && !ok; i++ {
+		if acceptedLimits[i] == limit {
 			ok = true
 		}
 	}

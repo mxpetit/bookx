@@ -48,7 +48,7 @@
     "translation": "Internal server error."
   },
   {
-    "id": "offset_invalid",
-    "translation": "The parameter offset is invalid"
+    "id": "limit_invalid",
+    "translation": "The parameter limit is invalid"
   }
 ]

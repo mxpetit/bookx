@@ -9,7 +9,7 @@ import (
 )
 
 func GetAllBooks(c *gin.Context) {
-	parameters := GetParameters(c, "last_token", "offset")
+	parameters := GetParameters(c, "uuid", "limit")
 	validator := validators.New(parameters)
 	validator.AddRules(validators.Pagination{}, validators.UUID{})
 	result := validator.Validate()
@@ -22,7 +22,17 @@ func GetAllBooks(c *gin.Context) {
 }
 
 func GetBook(c *gin.Context) {
-	result := store.GetBook(c, c.Param("id"))
+	parameters := map[string]string{
+		"uuid": c.Param("id"),
+	}
+	validator := validators.New(parameters)
+	validator.AddRules(validators.UUID{})
+	result := validator.Validate()
+
+	if result.Code == http.StatusOK {
+		result = store.GetBook(c, parameters)
+	}
+
 	translateAndWriteResponse(c, &result)
 }
 

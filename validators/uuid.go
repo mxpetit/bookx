@@ -12,14 +12,14 @@ var (
 )
 
 func (u UUID) validate(parameters map[string]string) error {
-	lastToken, _ := parameters["lastToken"]
+	uuid, _ := parameters["uuid"]
 
 	// No token provided
-	if lastToken == "" {
+	if uuid == "" {
 		return nil
 	}
 
-	_, err := gocql.ParseUUID(lastToken)
+	_, err := gocql.ParseUUID(uuid)
 
 	if err != nil {
 		return ErrInvalidUUID
