@@ -13,7 +13,12 @@ cd $GOPATH/src/github.com/mxpetit/bookx
 go run bookx/main.go
 ```
 
-Bookx need a [cassandra](http://cassandra.apache.org/) instance to be up. You should set these environnement variable :
+Or using docker-compose :
+```sh
+docker-compose up
+```
+
+Bookx need a [cassandra](https://github.com/mxpetit/bookx-cassandra) instance to be up. You should set these environnement variable :
 ```sh
 BOOKX_IP=127.0.0.1
 BOOKX_KEYSPACE=bookx

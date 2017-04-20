@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+  bookx:
+    build:
+      context: .
+    container_name: bookx/bookx
+    environment:
+      - BOOKX_IP=cassandra
+    ports:
+      - "8080:8080"
+    command: ["./wait-for-it.sh", "-t", "30", "migrations:8081", "--", "/go/bin/bookx"]
+  migrations:
+    image: maximep/bookx-migration
+    container_name: bookx/migrations
+    command: ["./wait-for-it.sh", "-t", "30", "cassandra:9042", "--", "./migrations.sh"]
+    ports:
+      - "8081:8081"
+  cassandra:
+    image: maximep/bookx-cassandra
+    container_name: bookx/cassandra
+    ports:
+      - "9042:9042"
+      - "9160:9160"
