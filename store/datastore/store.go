@@ -1,21 +1,27 @@
 package datastore
 
 import (
-	"errors"
 	"github.com/gocql/gocql"
 	"github.com/mxpetit/bookx/store"
 	"log"
 	"os"
 )
 
-// datastore represents a session.
+const (
+	KEYSPACE            = "bookx"
+	TEST_KEYSPACE       = "bookx_test"
+	DEFAULT_DATABASE_IP = "127.0.0.1"
+)
+
+// datastore represents a database session.
 type datastore struct {
 	*gocql.Session
 }
 
-// New returns a Store given environnement variable.
+// New returns a Store given database's IP adress.
 func New() store.Store {
-	session, err := open(os.Getenv("BOOKX_IP"), os.Getenv("BOOKX_KEYSPACE"))
+	databaseIp := os.Getenv("BOOKX_DATABASE_IP")
+	session, err := open(databaseIp, KEYSPACE)
 
 	if err != nil {
 		log.Fatal(err)
@@ -24,16 +30,19 @@ func New() store.Store {
 	return From(session)
 }
 
-// From returns a Store given a session.
+// From returns a Store given a database session.
 func From(session *gocql.Session) store.Store {
 	return &datastore{session}
 }
 
-// open returns a session given IP and keyspace.
+// open returns a database session given IP and keyspace.
 func open(ip, keyspace string) (*gocql.Session, error) {
-	if keyspace == "" || ip == "" {
-		return nil,
-			errors.New("Keyspace or IP missing. Unable to open database connection")
+	if keyspace == "" {
+		keyspace = KEYSPACE
+	}
+
+	if ip == "" {
+		ip = DEFAULT_DATABASE_IP
 	}
 
 	cluster := gocql.NewCluster(ip)
@@ -43,11 +52,11 @@ func open(ip, keyspace string) (*gocql.Session, error) {
 	return cluster.CreateSession()
 }
 
-// openTest opens a new database connection in order to perform tests.
+// openTest opens a new database connection to perform tests.
 func openTest() (*gocql.Session, error) {
 	var (
-		keyspace = "bookx_test"
-		ip       = "127.0.0.1"
+		keyspace = TEST_KEYSPACE
+		ip       = DEFAULT_DATABASE_IP
 	)
 
 	return open(ip, keyspace)

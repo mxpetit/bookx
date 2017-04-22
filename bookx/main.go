@@ -5,10 +5,25 @@ import (
 	"github.com/mxpetit/bookx/handlers"
 	"github.com/mxpetit/bookx/middleware"
 	"github.com/nicksnyder/go-i18n/i18n"
+	"log"
 	"os"
+	"os/signal"
+	"syscall"
+)
+
+const (
+	DEFAULT_PORT = "8080"
 )
 
 func main() {
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		stop()
+		os.Exit(0)
+	}()
+
 	app := gin.New()
 
 	i18n.MustLoadTranslationFile("translations/fr-FR.all.json")
@@ -30,14 +45,18 @@ func main() {
 	app.Run(":" + getPort())
 }
 
-// getPort returns the value port contained in BOOKX_PORT or the default
-// if any.
+// getPort returns the value port contained in BOOKX_PORT or DEFAULT_PORT.
 func getPort() string {
 	port := os.Getenv("BOOKX_PORT")
 
 	if port == "" {
-		return "8080"
+		return DEFAULT_PORT
 	}
 
 	return port
+}
+
+// stop stops gracefully the running application.
+func stop() {
+	log.Println("Gracefully stopping...")
 }
