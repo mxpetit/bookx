@@ -1,22 +1,22 @@
-package validators
+package checkers
 
 import (
 	"errors"
 	"github.com/gocql/gocql"
 )
 
-type UUID struct{}
-
 var (
 	ErrInvalidUUID = errors.New("uuid_invalid")
+	ErrMissingUUID = errors.New("uuid_missing")
 )
 
-func (u UUID) validate(parameters map[string]string) error {
-	uuid, _ := parameters["uuid"]
-
-	// No token provided
-	if uuid == "" {
+func uuidCheckFunction(uuid string, optional bool) error {
+	if optional && uuid == "" {
 		return nil
+	}
+
+	if uuid == "" {
+		return ErrMissingUUID
 	}
 
 	_, err := gocql.ParseUUID(uuid)

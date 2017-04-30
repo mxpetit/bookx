@@ -21,6 +21,9 @@ var (
 	ErrUnableToGenerateUUID   = model.NewDatastoreError(http.StatusInternalServerError, "unable_generate_uuid")
 	ErrUnableToCreateBook     = model.NewDatastoreError(http.StatusInternalServerError, "unable_create_book")
 	ErrUUIDInvalid            = model.NewDatastoreError(http.StatusBadRequest, "uuid_invalid")
+
+	DEFAULT_MIN_LIMIT = 10
+	DEFAULT_MAX_LIMIT = 100
 )
 
 // GetAllBooks returns the number of books between uuid and limit. If uuid isn't valid,
@@ -35,7 +38,15 @@ func (db *datastore) GetAllBooks(uuid, limit string) ([]*model.Book, error) {
 	parsedLimit, err := strconv.Atoi(limit)
 
 	if err != nil {
-		parsedLimit = 10
+		parsedLimit = DEFAULT_MIN_LIMIT
+	}
+
+	if parsedLimit > DEFAULT_MAX_LIMIT {
+		parsedLimit = DEFAULT_MAX_LIMIT
+	}
+
+	if parsedLimit < DEFAULT_MIN_LIMIT {
+		parsedLimit = DEFAULT_MIN_LIMIT
 	}
 
 	if parsedId, err := gocql.ParseUUID(uuid); err != nil {

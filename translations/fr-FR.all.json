@@ -32,6 +32,10 @@
     "translation": "Impossible de créer le livre."
   },
   {
+    "id": "unable_create_shelve",
+    "translation": "Impossible de créer l'étagère."
+  },
+  {
     "id": "unable_retrieves_books",
     "translation": "Impossible de récupérer le livre."
   },

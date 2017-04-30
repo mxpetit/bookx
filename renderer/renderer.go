@@ -75,3 +75,44 @@ func RenderCreateBook(result string, err error) Response {
 		}
 	}
 }
+
+func RenderCreateShelve(result string, err error) Response {
+	datastoreError, _ := err.(model.DatastoreError)
+
+	if !datastoreError.IsNil() {
+		return Response{
+			Code: datastoreError.Code(),
+			Data: map[string]interface{}{
+				"message": datastoreError.Error(),
+			},
+		}
+	} else {
+		return Response{
+			Code: http.StatusOK,
+			Data: map[string]interface{}{
+				"_links":  result,
+				"message": "shelve_created",
+			},
+		}
+	}
+}
+
+func RenderGetShelve(result *model.Shelve, err error) Response {
+	datastoreError, _ := err.(model.DatastoreError)
+
+	if !datastoreError.IsNil() {
+		return Response{
+			Code: datastoreError.Code(),
+			Data: map[string]interface{}{
+				"message": datastoreError.Error(),
+			},
+		}
+	} else {
+		return Response{
+			Code: http.StatusOK,
+			Data: map[string]interface{}{
+				"result": result,
+			},
+		}
+	}
+}

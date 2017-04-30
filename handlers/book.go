@@ -2,17 +2,19 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mxpetit/bookx/checkers"
 	"github.com/mxpetit/bookx/model"
 	"github.com/mxpetit/bookx/store"
-	"github.com/mxpetit/bookx/validators"
 	"net/http"
 )
 
 func GetAllBooks(c *gin.Context) {
 	parameters := GetParameters(c, "uuid", "limit")
-	validator := validators.New(parameters)
-	validator.AddRules(validators.Pagination{}, validators.UUID{})
-	result := validator.Validate()
+
+	syntaxCheckerGroup := checkers.NewSyntaxCheckerGroup(parameters)
+	syntaxCheckerGroup.AddOptional(checkers.PAGINATION_CHECK_FUNCTION, "limit")
+	syntaxCheckerGroup.AddOptional(checkers.UUID_CHECK_FUNCTION, "uuid")
+	result := syntaxCheckerGroup.Validate()
 
 	if result.Code == http.StatusOK {
 		result = store.GetAllBooks(c, parameters)
@@ -25,9 +27,10 @@ func GetBook(c *gin.Context) {
 	parameters := map[string]string{
 		"uuid": c.Param("id"),
 	}
-	validator := validators.New(parameters)
-	validator.AddRules(validators.UUID{})
-	result := validator.Validate()
+
+	syntaxCheckerGroup := checkers.NewSyntaxCheckerGroup(parameters)
+	syntaxCheckerGroup.Add(checkers.UUID_CHECK_FUNCTION, "uuid")
+	result := syntaxCheckerGroup.Validate()
 
 	if result.Code == http.StatusOK {
 		result = store.GetBook(c, parameters)
