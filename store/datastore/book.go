@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	getAllPagedBooks = "SELECT * FROM book WHERE token(id) > token(?) LIMIT ?"
+	getAllPagedBooks = "SELECT * FROM book WHERE token(id) >= token(?) LIMIT ?"
 	getAllBooks      = "SELECT * FROM book LIMIT ?"
 	getBook          = "SELECT * FROM book WHERE id = ?"
 	insertBook       = "INSERT INTO book (id, number_of_pages, title) VALUES (?, ?, ?)"

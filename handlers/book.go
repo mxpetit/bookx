@@ -20,7 +20,7 @@ func GetAllBooks(c *gin.Context) {
 		result = store.GetAllBooks(c, parameters)
 	}
 
-	translateAndWriteResponse(c, &result)
+	translateAndWriteResponse(c, result)
 }
 
 func GetBook(c *gin.Context) {
@@ -36,7 +36,7 @@ func GetBook(c *gin.Context) {
 		result = store.GetBook(c, parameters)
 	}
 
-	translateAndWriteResponse(c, &result)
+	translateAndWriteResponse(c, result)
 }
 
 func CreateBook(c *gin.Context) {
@@ -58,5 +58,5 @@ func CreateBook(c *gin.Context) {
 	}
 
 	result := store.CreateBook(c, in.Title, in.NumberOfPages)
-	translateAndWriteResponse(c, &result)
+	translateAndWriteResponse(c, result)
 }

@@ -18,7 +18,7 @@ func CreateShelve(c *gin.Context) {
 		result = store.CreateShelve(c, parameters)
 	}
 
-	translateAndWriteResponse(c, &result)
+	translateAndWriteResponse(c, result)
 }
 
 func GetShelve(c *gin.Context) {
@@ -34,5 +34,5 @@ func GetShelve(c *gin.Context) {
 		result = store.GetShelve(c, parameters)
 	}
 
-	translateAndWriteResponse(c, &result)
+	translateAndWriteResponse(c, result)
 }

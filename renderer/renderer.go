@@ -11,108 +11,86 @@ type Response struct {
 	Data map[string]interface{}
 }
 
-func RenderGetAllBooks(results []*model.Book, err error) Response {
+// renderErrorResponse wraps a standard format for error.
+func renderErrorResponse(err error) *Response {
 	datastoreError, _ := err.(model.DatastoreError)
 
-	if !datastoreError.IsNil() {
-		return Response{
-			Code: datastoreError.Code(),
-			Data: map[string]interface{}{
-				"message": datastoreError.Error(),
-			},
-		}
-	} else {
-		resultsLength := len(results)
-
-		return Response{
-			Code: http.StatusOK,
-			Data: map[string]interface{}{
-				"_links":  results[resultsLength-1].Id,
-				"results": results,
-				"length":  resultsLength,
-			},
-		}
+	return &Response{
+		Code: datastoreError.Code(),
+		Data: map[string]interface{}{
+			"message": datastoreError.Error(),
+		},
 	}
 }
 
-func RenderGetBook(result *model.Book, err error) Response {
-	datastoreError, _ := err.(model.DatastoreError)
+func RenderGetAllBooks(results []*model.Book, err error) *Response {
+	if err != nil {
+		return renderErrorResponse(err)
+	}
 
-	if !datastoreError.IsNil() {
-		return Response{
-			Code: datastoreError.Code(),
-			Data: map[string]interface{}{
-				"message": datastoreError.Error(),
-			},
-		}
-	} else {
-		return Response{
-			Code: http.StatusOK,
-			Data: map[string]interface{}{
-				"result": result,
-			},
-		}
+	resultsLength := len(results)
+
+	return &Response{
+		Code: http.StatusOK,
+		Data: map[string]interface{}{
+			"last":    results[resultsLength-1].Id,
+			"first":   results[0].Id,
+			"results": results,
+			"length":  resultsLength,
+		},
 	}
 }
 
-func RenderCreateBook(result string, err error) Response {
-	datastoreError, _ := err.(model.DatastoreError)
+func RenderGetBook(result *model.Book, err error) *Response {
+	if err != nil {
+		return renderErrorResponse(err)
+	}
 
-	if !datastoreError.IsNil() {
-		return Response{
-			Code: datastoreError.Code(),
-			Data: map[string]interface{}{
-				"message": datastoreError.Error(),
-			},
-		}
-	} else {
-		return Response{
-			Code: http.StatusOK,
-			Data: map[string]interface{}{
-				"_links":  result,
-				"message": "book_created",
-			},
-		}
+	return &Response{
+		Code: http.StatusOK,
+		Data: map[string]interface{}{
+			"result": result,
+		},
 	}
 }
 
-func RenderCreateShelve(result string, err error) Response {
-	datastoreError, _ := err.(model.DatastoreError)
+func RenderCreateBook(result string, err error) *Response {
+	if err != nil {
+		return renderErrorResponse(err)
+	}
 
-	if !datastoreError.IsNil() {
-		return Response{
-			Code: datastoreError.Code(),
-			Data: map[string]interface{}{
-				"message": datastoreError.Error(),
-			},
-		}
-	} else {
-		return Response{
-			Code: http.StatusOK,
-			Data: map[string]interface{}{
-				"_links":  result,
-				"message": "shelve_created",
-			},
-		}
+	return &Response{
+		Code: http.StatusOK,
+		Data: map[string]interface{}{
+			"_links":  result,
+			"message": "book_created",
+		},
 	}
 }
 
-func RenderGetShelve(result *model.Shelve, err error) Response {
-	datastoreError, _ := err.(model.DatastoreError)
+func RenderCreateShelve(result string, err error) *Response {
+	if err != nil {
+		return renderErrorResponse(err)
+	}
 
-	if !datastoreError.IsNil() {
-		return Response{
-			Code: datastoreError.Code(),
-			Data: map[string]interface{}{
-				"message": datastoreError.Error(),
-			},
-		}
-	} else {
-		return Response{
-			Code: http.StatusOK,
-			Data: map[string]interface{}{
-				"result": result,
-			},
-		}
+	return &Response{
+		Code: http.StatusOK,
+		Data: map[string]interface{}{
+			"_links":  result,
+			"message": "shelve_created",
+		},
+	}
+}
+
+func RenderGetShelve(result *model.Shelve, err error) *Response {
+	if err != nil {
+		return renderErrorResponse(err)
+	}
+
+	return &Response{
+		Code: http.StatusOK,
+		Data: map[string]interface{}{
+			"result": result,
+		},
 	}
 }

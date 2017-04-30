@@ -70,7 +70,7 @@ func (w *SyntaxCheckerGroup) AddOptional(syntaxCheckerKey string, keys ...string
 
 // Validate calls every CheckFunction associated to a SyntaxChecker
 // and returns any errors that occured during validation.
-func (w *SyntaxCheckerGroup) Validate() renderer.Response {
+func (w *SyntaxCheckerGroup) Validate() *renderer.Response {
 	var errs []string
 
 	for _, syntaxChecker := range w.checkers {
@@ -78,12 +78,12 @@ func (w *SyntaxCheckerGroup) Validate() renderer.Response {
 	}
 
 	if len(errs) == 0 {
-		return renderer.Response{
+		return &renderer.Response{
 			Code: http.StatusOK,
 		}
 	}
 
-	return renderer.Response{
+	return &renderer.Response{
 		Code: http.StatusBadRequest,
 		Data: map[string]interface{}{
 			"messages": errs,
