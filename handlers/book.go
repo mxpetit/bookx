@@ -9,11 +9,10 @@ import (
 )
 
 func GetAllBooks(c *gin.Context) {
-	parameters := GetParameters(c, "uuid", "limit")
+	parameters := GetParameters(c, "limit")
 
 	syntaxCheckerGroup := checkers.NewSyntaxCheckerGroup(parameters)
 	syntaxCheckerGroup.AddOptional(checkers.PAGINATION_CHECK_FUNCTION, "limit")
-	syntaxCheckerGroup.AddOptional(checkers.UUID_CHECK_FUNCTION, "uuid")
 	result := syntaxCheckerGroup.Validate()
 
 	if result.Code == http.StatusOK {
@@ -23,13 +22,41 @@ func GetAllBooks(c *gin.Context) {
 	translateAndWriteResponse(c, result)
 }
 
-func GetBook(c *gin.Context) {
-	parameters := map[string]string{
-		"uuid": c.Param("id"),
-	}
+func GetNextBooks(c *gin.Context) {
+	parameters := GetParameters(c, "id", "limit")
 
 	syntaxCheckerGroup := checkers.NewSyntaxCheckerGroup(parameters)
-	syntaxCheckerGroup.Add(checkers.UUID_CHECK_FUNCTION, "uuid")
+	syntaxCheckerGroup.Add(checkers.UUID_CHECK_FUNCTION, "id")
+	syntaxCheckerGroup.AddOptional(checkers.PAGINATION_CHECK_FUNCTION, "limit")
+	result := syntaxCheckerGroup.Validate()
+
+	if result.Code == http.StatusOK {
+		result = store.GetNextBooks(c, parameters)
+	}
+
+	translateAndWriteResponse(c, result)
+}
+
+func GetPreviousBooks(c *gin.Context) {
+	parameters := GetParameters(c, "id", "limit")
+
+	syntaxCheckerGroup := checkers.NewSyntaxCheckerGroup(parameters)
+	syntaxCheckerGroup.Add(checkers.UUID_CHECK_FUNCTION, "id")
+	syntaxCheckerGroup.AddOptional(checkers.PAGINATION_CHECK_FUNCTION, "limit")
+	result := syntaxCheckerGroup.Validate()
+
+	if result.Code == http.StatusOK {
+		result = store.GetPreviousBooks(c, parameters)
+	}
+
+	translateAndWriteResponse(c, result)
+}
+
+func GetBook(c *gin.Context) {
+	parameters := GetParameters(c, "id")
+
+	syntaxCheckerGroup := checkers.NewSyntaxCheckerGroup(parameters)
+	syntaxCheckerGroup.Add(checkers.UUID_CHECK_FUNCTION, "id")
 	result := syntaxCheckerGroup.Validate()
 
 	if result.Code == http.StatusOK {

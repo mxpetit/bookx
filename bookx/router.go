@@ -19,6 +19,8 @@ func getRouter() *gin.Engine {
 	bookGroup := router.Group("/book")
 	{
 		bookGroup.GET("", handlers.GetAllBooks)
+		bookGroup.GET("/:id/previous", handlers.GetPreviousBooks)
+		bookGroup.GET("/:id/next", handlers.GetNextBooks)
 		bookGroup.GET("/:id", handlers.GetBook)
 		bookGroup.POST("", handlers.CreateBook)
 	}

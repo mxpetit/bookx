@@ -7,23 +7,13 @@ import (
 )
 
 type Store interface {
-	GetAllBooks(string, string) ([]*model.Book, error)
-	GetBook(string) (*model.Book, error)
 	CreateBook(string, int) (string, error)
 	CreateShelve(string) (string, error)
+	GetAllBooks(string) ([]*model.Book, error)
+	GetBook(string) (*model.Book, error)
+	GetNextBooks(string, string) ([]*model.Book, error)
+	GetPreviousBooks(string, string) ([]*model.Book, error)
 	GetShelve(string) (*model.Shelve, error)
-}
-
-func GetAllBooks(c context.Context, parameters map[string]string) *renderer.Response {
-	result, err := FromContext(c).GetAllBooks(parameters["uuid"], parameters["limit"])
-
-	return renderer.RenderGetAllBooks(result, err)
-}
-
-func GetBook(c context.Context, parameters map[string]string) *renderer.Response {
-	result, err := FromContext(c).GetBook(parameters["uuid"])
-
-	return renderer.RenderGetBook(result, err)
 }
 
 func CreateBook(c context.Context, title string, numberOfPages int) *renderer.Response {
@@ -36,6 +26,30 @@ func CreateShelve(c context.Context, parameters map[string]string) *renderer.Res
 	result, err := FromContext(c).CreateShelve(parameters["name"])
 
 	return renderer.RenderCreateShelve(result, err)
+}
+
+func GetAllBooks(c context.Context, parameters map[string]string) *renderer.Response {
+	result, err := FromContext(c).GetAllBooks(parameters["limit"])
+
+	return renderer.RenderGetAllBooks(result, err)
+}
+
+func GetBook(c context.Context, parameters map[string]string) *renderer.Response {
+	result, err := FromContext(c).GetBook(parameters["uuid"])
+
+	return renderer.RenderGetBook(result, err)
+}
+
+func GetNextBooks(c context.Context, parameters map[string]string) *renderer.Response {
+	result, err := FromContext(c).GetNextBooks(parameters["id"], parameters["limit"])
+
+	return renderer.RenderGetAllBooks(result, err)
+}
+
+func GetPreviousBooks(c context.Context, parameters map[string]string) *renderer.Response {
+	result, err := FromContext(c).GetPreviousBooks(parameters["id"], parameters["limit"])
+
+	return renderer.RenderGetAllBooks(result, err)
 }
 
 func GetShelve(c context.Context, parameters map[string]string) *renderer.Response {

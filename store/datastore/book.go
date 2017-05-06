@@ -4,11 +4,11 @@ import (
 	"github.com/gocql/gocql"
 	"github.com/mxpetit/bookx/model"
 	"net/http"
-	"strconv"
 )
 
 const (
-	getAllPagedBooks = "SELECT * FROM book WHERE token(id) >= token(?) LIMIT ?"
+	getNextBooks     = "SELECT * FROM book WHERE token(id) >= token(?) LIMIT ?"
+	getPreviousBooks = "SELECT * FROM book WHERE token(id) <= token(?) LIMIT ?"
 	getAllBooks      = "SELECT * FROM book LIMIT ?"
 	getBook          = "SELECT * FROM book WHERE id = ?"
 	insertBook       = "INSERT INTO book (id, number_of_pages, title) VALUES (?, ?, ?)"
@@ -22,40 +22,20 @@ var (
 	ErrUnableToCreateBook     = model.NewDatastoreError(http.StatusInternalServerError, "unable_create_book")
 	ErrUUIDInvalid            = model.NewDatastoreError(http.StatusBadRequest, "uuid_invalid")
 
-	DEFAULT_MIN_LIMIT = 10
+	DEFAULT_MIN_LIMIT = 1
 	DEFAULT_MAX_LIMIT = 100
 )
 
-// GetAllBooks returns the number of books between uuid and limit. If uuid isn't valid,
-// it'll get the first books as specified by limit parameter.
-func (db *datastore) GetAllBooks(uuid, limit string) ([]*model.Book, error) {
+// scanBooks scans an iterator to retrieve a list of books.
+func scanBooks(iter *gocql.Iter) ([]*model.Book, error) {
+	if iter == nil {
+		return []*model.Book{}, ErrUnableToRetrievesBooks
+	}
+
 	var title string
 	var numberOfPages int
 	var id gocql.UUID
 	var results []*model.Book
-	var query *gocql.Query
-
-	parsedLimit, err := strconv.Atoi(limit)
-
-	if err != nil {
-		parsedLimit = DEFAULT_MIN_LIMIT
-	}
-
-	if parsedLimit > DEFAULT_MAX_LIMIT {
-		parsedLimit = DEFAULT_MAX_LIMIT
-	}
-
-	if parsedLimit < DEFAULT_MIN_LIMIT {
-		parsedLimit = DEFAULT_MIN_LIMIT
-	}
-
-	if parsedId, err := gocql.ParseUUID(uuid); err != nil {
-		query = db.Query(getAllBooks, parsedLimit)
-	} else {
-		query = db.Query(getAllPagedBooks, parsedId, parsedLimit)
-	}
-
-	iter := query.Iter()
 
 	for iter.Scan(&id, &numberOfPages, &title) {
 		results = append(results, &model.Book{
@@ -65,7 +45,7 @@ func (db *datastore) GetAllBooks(uuid, limit string) ([]*model.Book, error) {
 		})
 	}
 
-	if err = iter.Close(); err != nil {
+	if err := iter.Close(); err != nil {
 		return []*model.Book{}, ErrUnableToRetrievesBooks
 	}
 
@@ -76,7 +56,15 @@ func (db *datastore) GetAllBooks(uuid, limit string) ([]*model.Book, error) {
 	return results, nil
 }
 
-// GetBook returns book's details given its uuid.
+// GetAllBooks gets n first books.
+func (db *datastore) GetAllBooks(limit string) ([]*model.Book, error) {
+	parsedLimit := getCqlLimit(limit)
+	iter := db.Query(getAllBooks, parsedLimit).Iter()
+
+	return scanBooks(iter)
+}
+
+// GetBook gets book's details given its uuid.
 func (db *datastore) GetBook(uuid string) (*model.Book, error) {
 	var title string
 	var numberOfPages int
@@ -102,7 +90,35 @@ func (db *datastore) GetBook(uuid string) (*model.Book, error) {
 	return queryResult, nil
 }
 
-// CreateBook returns the book's uuid that was created.
+// GetNextBooks gets the n next books to id.
+func (db *datastore) GetNextBooks(id string, limit string) ([]*model.Book, error) {
+	parsedLimit := getCqlLimit(limit)
+	parsedId, err := gocql.ParseUUID(id)
+
+	if err != nil {
+		return []*model.Book{}, ErrUUIDInvalid
+	}
+
+	iter := db.Query(getNextBooks, parsedId, parsedLimit).Iter()
+
+	return scanBooks(iter)
+}
+
+// GetPreviousBooks gets the n previous books to id.
+func (db *datastore) GetPreviousBooks(id string, limit string) ([]*model.Book, error) {
+	parsedLimit := getCqlLimit(limit)
+	parsedId, err := gocql.ParseUUID(id)
+
+	if err != nil {
+		return []*model.Book{}, ErrUUIDInvalid
+	}
+
+	iter := db.Query(getPreviousBooks, parsedId, parsedLimit).Iter()
+
+	return scanBooks(iter)
+}
+
+// CreateBook creates a new book with generated UUID.
 func (db *datastore) CreateBook(title string, numberOfPages int) (string, error) {
 	uuid, err := gocql.RandomUUID()
 

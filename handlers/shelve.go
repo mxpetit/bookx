@@ -22,12 +22,10 @@ func CreateShelve(c *gin.Context) {
 }
 
 func GetShelve(c *gin.Context) {
-	parameters := map[string]string{
-		"uuid": c.Param("id"),
-	}
+	parameters := GetParameters(c, "id")
 
 	syntaxCheckerGroup := checkers.NewSyntaxCheckerGroup(parameters)
-	syntaxCheckerGroup.Add(checkers.UUID_CHECK_FUNCTION, "uuid")
+	syntaxCheckerGroup.Add(checkers.UUID_CHECK_FUNCTION, "id")
 	result := syntaxCheckerGroup.Validate()
 
 	if result.Code == http.StatusOK {
