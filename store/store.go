@@ -35,7 +35,7 @@ func GetAllBooks(c context.Context, parameters map[string]string) *renderer.Resp
 }
 
 func GetBook(c context.Context, parameters map[string]string) *renderer.Response {
-	result, err := FromContext(c).GetBook(parameters["uuid"])
+	result, err := FromContext(c).GetBook(parameters["id"])
 
 	return renderer.RenderGetBook(result, err)
 }
